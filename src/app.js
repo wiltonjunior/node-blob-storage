@@ -7,7 +7,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 const multer = require("multer");
 const inMemoryStorage = multer.memoryStorage();
@@ -28,7 +28,7 @@ const getBlobName = (originalName) => {
 
 app.post("/upload", uploadStratedy, (req, res) => {
   const blobName = getBlobName(req.file.originalname);
-  const stream = getStream(req.file.buffer); 
+  const stream = getStream(req.file.buffer);
   const streamLength = req.file.buffer.length;
   blobService.createBlockBlobFromStream(
     containerName,
@@ -45,20 +45,22 @@ app.post("/upload", uploadStratedy, (req, res) => {
 });
 
 app.get("/all", (req, res) => {
-    blobService.listBlobsSegmented(containerName, null, (err, data) => {
-        if(err){
-            console.log(err);
-            return;
-        }else {
-            let image = '';
-            if(data.entries.length){
-                data.entries.forEach(element => {
-                    image += `<img src="https://${config.getStorageAccountName()}.blob.core.windows.net/${containerName}/${element.name}" width="500" />`
-                })
-                res.send(image)
-            }
-        }
-    })
+  blobService.listBlobsSegmented(containerName, null, (err, data) => {
+    if (err) {
+      console.log(err);
+      return;
+    } else {
+      let image = "";
+      if (data.entries.length) {
+        data.entries.forEach((element) => {
+          image += `<img src="https://${config.getStorageAccountName()}.blob.core.windows.net/${containerName}/${
+            element.name
+          }" width="500" />`;
+        });
+        res.send(image);
+      }
+    }
+  });
 });
 
 app.listen(3000, () => {
